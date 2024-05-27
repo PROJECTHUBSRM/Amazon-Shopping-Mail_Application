@@ -1,3 +1,21 @@
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"  # Adjust the CIDR block as needed
+
+  tags = {
+    Name = "MainVPC"
+  }
+}
+
+resource "aws_subnet" "main" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.1.0/24"  # Adjust the CIDR block as needed
+  availability_zone = "ap-south-1a"  # Adjust the availability zone as needed
+
+  tags = {
+    Name = "MainSubnet"
+  }
+}
+
 resource "aws_security_group" "jenkins_sg" {
   name        = "Jenkins-Security-Group"
   description = "Open 22, 80, 443, 8080, 9000, 3000"
@@ -34,6 +52,7 @@ resource "aws_instance" "web" {
   instance_type          = "t2.large"
   key_name               = "Amazon-app-key"
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+  subnet_id              = aws_subnet.main.id
   user_data              = file("./install_jenkins.sh")
 
   tags = {
