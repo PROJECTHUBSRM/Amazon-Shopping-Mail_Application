@@ -47,7 +47,7 @@ resource "aws_security_group" "jenkins_sg" {
   }
 }
 
-resource "aws_instance" "web" {
+resource "aws_instance" "web_app" {
   ami                    = "ami-0103953a003440c37"
   instance_type          = "t2.large"
   key_name               = "Amazon-app-key"
