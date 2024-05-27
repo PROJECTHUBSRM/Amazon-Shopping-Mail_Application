@@ -11,7 +11,12 @@ resource "aws_subnet" "main" {
   cidr_block        = "10.0.1.0/24"  # Adjust the CIDR block as needed
   availability_zone = "ap-south-1a"  # Adjust the availability zone as needed
 
-  tags = {
+ root_block_device {
+    volume_size = 30
+    volume_type = "gp2"  # Adjust volume type as per your requirements
+  }
+ 
+tags = {
     Name = "MainSubnet"
   }
 }
