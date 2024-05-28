@@ -50,7 +50,7 @@ resource "aws_security_group" "jenkins_sg" {
 resource "aws_instance" "web_app" {
   ami                    = "ami-0103953a003440c37"
   instance_type          = "t2.large"
-  key_name               = "Amazon-app-key"
+  key_name               = "aws"
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
   subnet_id              = aws_subnet.main.id
   user_data              = file("./install_jenkins.sh")
