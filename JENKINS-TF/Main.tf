@@ -1,31 +1,13 @@
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"  # Adjust the CIDR block as needed
+resource "aws_security_group" "Jenkins-sg" {
+  name        = "Jenkins-Security Group"
+  description = "Open 22,443,80,8080,9000"
 
-  tags = {
-    Name = "MainVPC"
-  }
-}
-
-resource "aws_subnet" "main" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.1.0/24"  # Adjust the CIDR block as needed
-  availability_zone = "ap-south-1a"  # Adjust the availability zone as needed
- 
-tags = {
-    Name = "MainSubnet"
-  }
-}
-
-resource "aws_security_group" "jenkins_sg" {
-  name        = "Jenkins-Security-Group"
-  description = "Open 22, 80, 443, 8080, 9000, 3000"
-
-  dynamic "ingress" {
-    for_each = [22, 80, 443, 8080, 9000, 3000]
-    content {
-      description      = "Allow traffic on port ${ingress.value}"
-      from_port        = ingress.value
-      to_port          = ingress.value
+  # Define a single ingress rule to allow traffic on all specified ports
+  ingress = [
+    for port in [22, 80, 443, 8080, 9000, 3000] : {
+      description      = "TLS from VPC"
+      from_port        = port
+      to_port          = port
       protocol         = "tcp"
       cidr_blocks      = ["0.0.0.0/0"]
       ipv6_cidr_blocks = []
@@ -33,7 +15,7 @@ resource "aws_security_group" "jenkins_sg" {
       security_groups  = []
       self             = false
     }
-  }
+  ]
 
   egress {
     from_port   = 0
@@ -47,18 +29,17 @@ resource "aws_security_group" "jenkins_sg" {
   }
 }
 
-resource "aws_instance" "web_app" {
-  ami                    = "ami-0103953a003440c37"
+
+resource "aws_instance" "web" {
+  ami                    = "ami-0f403e3180720dd7e"
   instance_type          = "t2.large"
   key_name               = "aws"
-  vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
-  subnet_id              = aws_subnet.main.id
-  user_data              = file("./install_jenkins.sh")
+  vpc_security_group_ids = [aws_security_group.Jenkins-sg.id]
+  user_data              = templatefile("./install_jenkins.sh", {})
 
   tags = {
     Name = "Jenkins-sonar"
   }
-
   root_block_device {
     volume_size = 30
   }
